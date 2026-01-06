@@ -64,7 +64,7 @@ async function fetchAndLoadData() {
     }
 }
 
-// ... (나머지 3~7번 함수는 이전과 동일) ...
+// 3. 재생/일시정지 토글
 function togglePlayPause() {
     if (isPlaying) {
         clearInterval(intervalId);
@@ -76,6 +76,7 @@ function togglePlayPause() {
     isPlaying = !isPlaying;
 }
 
+// 4. 속도 변경
 function changeSpeed(multiplier) {
     speed = 1000 / multiplier; 
     if (isPlaying) {
@@ -85,6 +86,7 @@ function changeSpeed(multiplier) {
     }
 }
 
+// 5. 다음 데이터 업데이트 (Tick by Tick 시뮬레이션)
 function updateChart() {
     if (currentIndex < allCandleData.length) {
         const nextCandle = allCandleData[currentIndex];
@@ -98,6 +100,7 @@ function updateChart() {
     }
 }
 
+// 6. Rewind 기능 (단순화)
 function rewindData() {
     currentIndex = Math.max(100, currentIndex - 100);
     candleSeries.setData(allCandleData.slice(0, currentIndex));
@@ -107,6 +110,7 @@ function rewindData() {
     statusEl.textContent = '상태: Rewind됨. 일시정지';
 }
 
+// 7. 매매 시뮬레이션 (Trading Logics)
 function placeTrade(type) {
     const currentCandle = allCandleData[currentIndex - 1];
     if (currentCandle) {
