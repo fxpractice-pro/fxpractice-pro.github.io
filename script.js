@@ -1,12 +1,12 @@
-// Oanda API 설정 (무료 GitHub Pages 환경이므로 클라이언트에 키 노출)
+// Oanda API 설정
 const OANDA_API_KEY = '3a026cce1daad9b10146f78861531012-2c1afca8dbad0e9f354e65f170af174c';
-const OANDA_ACCOUNT_ID = '101-001-38007121-001'; // <<<=== 여기에 계정 ID 입력!
-const instrument = 'EUR_USD'; // 통화쌍 설정 가능
-const granularity = 'H1'; // 1시간봉 (3년치 데이터를 감당하기 위함)
+const OANDA_ACCOUNT_ID = '101-001-38007121-001'; // <<<=== 계정 ID 확인!
+const instrument = 'EUR_USD'; 
+const granularity = 'H1'; 
 
 let isPlaying = false;
 let currentIndex = 0;
-let speed = 500; // 초기 속도 설정 (ms)
+let speed = 500; 
 let intervalId;
 let allCandleData = [];
 
@@ -15,7 +15,7 @@ const indexDisplayEl = document.getElementById('index-display');
 const chartArea = document.getElementById('chart-area');
 
 // 1. 차트 생성 (Lightweight Charts API 사용)
-const chart = LightweightCharts.createChart(chartArea, {
+const chart = LightweightCharts.create(chartArea, {
   width: chartArea.clientWidth,
   height: 500,
   layout: { textColor: '#d1d4dc', background: { type: 'solid', color: '#fff' } },
@@ -23,18 +23,23 @@ const chart = LightweightCharts.createChart(chartArea, {
 const candleSeries = chart.addCandlestickSeries();
 
 
-// 2. Oanda API 데이터 가져오기
+// 2. Oanda API 데이터 가져오기 (프록시 서버 경유)
 async function fetchAndLoadData() {
     statusEl.textContent = '상태: 데이터 로딩 중...';
-    // 3년 전 날짜 계산 (Unix 타임스탬프)
     const threeYearsAgo = Math.floor(Date.now() / 1000 - (3 * 365 * 24 * 60 * 60));
     
-    // CORS 문제 해결을 위해 프록시 서버 사용을 권장하지만, 일단 직접 호출
     const url = `api-fxpractice.oanda.com{instrument}/candles?price=M&granularity=${granularity}&from=${threeYearsAgo}`;
+    
+    // 무료 프록시 서버(corsproxy.io) URL로 감싸서 CORS 문제 우회
+    const proxyUrl = `corsproxy.io{encodeURIComponent(url)}`;
 
     try {
-        const response = await fetch(url, {
-            headers: { 'Authorization': `Bearer ${OANDA_API_KEY}` }
+        // 프록시 서버를 통해 Oanda API 호출
+        const response = await fetch(proxyUrl, {
+            headers: { 
+                'Authorization': `Bearer ${OANDA_API_KEY}`,
+                // 'x-cors-api-key': 'temp_api_key' // corsproxy.io는 키가 필요 없음
+            }
         });
         
         if (!response.ok) throw new Error('API 호출 실패: ' + response.statusText);
@@ -50,13 +55,12 @@ async function fetchAndLoadData() {
         }));
 
         statusEl.textContent = '상태: 로드 완료. 일시정지됨';
-        // 초기 데이터 로드 (첫 100개 봉만 표시)
         candleSeries.setData(allCandleData.slice(0, 100));
         currentIndex = 100;
 
     } catch (error) {
         console.error("Oanda API 오류:", error);
-        statusEl.textContent = '상태: 오류 발생! Console 확인';
+        statusEl.textContent = '상태: 오류 발생! 콘솔 확인';
     }
 }
 
@@ -86,7 +90,6 @@ function changeSpeed(multiplier) {
 function updateChart() {
     if (currentIndex < allCandleData.length) {
         const nextCandle = allCandleData[currentIndex];
-        // 차트에 새로운 캔들 추가
         candleSeries.update(nextCandle); 
         currentIndex++;
         indexDisplayEl.textContent = currentIndex;
@@ -97,13 +100,13 @@ function updateChart() {
     }
 }
 
-// 6. Rewind 기능 (단순화: 100개 봉 뒤로 돌아가기)
+// 6. Rewind 기능 (단순화)
 function rewindData() {
     currentIndex = Math.max(100, currentIndex - 100);
     candleSeries.setData(allCandleData.slice(0, currentIndex));
-    chart.timeScale().fitContent(); // 차트 스케일 재조정
+    chart.timeScale().fitContent(); 
     indexDisplayEl.textContent = currentIndex;
-    if (isPlaying) togglePlayPause(); // 재생 중이면 일시정지
+    if (isPlaying) togglePlayPause(); 
     statusEl.textContent = '상태: Rewind됨. 일시정지';
 }
 
@@ -111,13 +114,11 @@ function rewindData() {
 function placeTrade(type) {
     const currentCandle = allCandleData[currentIndex - 1];
     if (currentCandle) {
-        console.log(`${type} 주문 @ ${currentCandle.close} (시간: ${new Date(currentCandle.time * 1000).toISOString()})`);
+        console.log(`${type} 주문 @ ${currentCandle.close}`);
         const journalEl = document.getElementById('journal');
         journalEl.value += `\n[${type}] @ ${currentCandle.close}`;
-        // 여기에 실제 가상 손익 계산 및 통계 로직 추가 필요
     }
 }
-
 
 // 웹사이트 로드 시 데이터 불러오기
 fetchAndLoadData();
