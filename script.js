@@ -1,6 +1,6 @@
 // Oanda API 설정
 const OANDA_API_KEY = '3a026cce1daad9b10146f78861531012-2c1afca8dbad0e9f354e65f170af174c';
-const OANDA_ACCOUNT_ID = '101-001-38007121-001'; // <<<=== 계정 ID 확인!
+const OANDA_ACCOUNT_ID = '101-001-38007121-001'; // 계정 ID 확인 완료
 const instrument = 'EUR_USD'; 
 const granularity = 'H1'; 
 
@@ -23,29 +23,29 @@ const chart = LightweightCharts.create(chartArea, {
 const candleSeries = chart.addCandlestickSeries();
 
 
-// 2. Oanda API 데이터 가져오기 (프록시 서버 경유)
+// 2. Oanda API 데이터 가져오기 (대체 프록시 서버 경유)
 async function fetchAndLoadData() {
     statusEl.textContent = '상태: 데이터 로딩 중...';
     const threeYearsAgo = Math.floor(Date.now() / 1000 - (3 * 365 * 24 * 60 * 60));
     
     const url = `api-fxpractice.oanda.com{instrument}/candles?price=M&granularity=${granularity}&from=${threeYearsAgo}`;
     
-    // 무료 프록시 서버(corsproxy.io) URL로 감싸서 CORS 문제 우회
-    const proxyUrl = `corsproxy.io{encodeURIComponent(url)}`;
+    // !!! 대체 무료 프록시 서버(api.allorigins.win) 사용 !!!
+    const proxyUrl = `api.allorigins.win{encodeURIComponent(url)}`;
 
     try {
-        // 프록시 서버를 통해 Oanda API 호출
         const response = await fetch(proxyUrl, {
             headers: { 
                 'Authorization': `Bearer ${OANDA_API_KEY}`,
-                // 'x-cors-api-key': 'temp_api_key' // corsproxy.io는 키가 필요 없음
             }
         });
         
-        if (!response.ok) throw new Error('API 호출 실패: ' + response.statusText);
+        if (!response.ok) throw new Error('Proxy server error or API call failed: ' + response.statusText);
         
-        const data = await response.json();
-        
+        const proxyData = await response.json();
+        // allorigins.win은 결과값을 JSON 문자열로 감싸서 주기 때문에 파싱이 한 번 더 필요
+        const data = JSON.parse(proxyData.contents); 
+
         allCandleData = data.candles.map(c => ({
             time: new Date(c.time).getTime() / 1000,
             open: parseFloat(c.mid.o),
@@ -64,7 +64,7 @@ async function fetchAndLoadData() {
     }
 }
 
-// 3. 재생/일시정지 토글
+// ... (나머지 3~7번 함수는 이전과 동일) ...
 function togglePlayPause() {
     if (isPlaying) {
         clearInterval(intervalId);
@@ -76,7 +76,6 @@ function togglePlayPause() {
     isPlaying = !isPlaying;
 }
 
-// 4. 속도 변경
 function changeSpeed(multiplier) {
     speed = 1000 / multiplier; 
     if (isPlaying) {
@@ -86,7 +85,6 @@ function changeSpeed(multiplier) {
     }
 }
 
-// 5. 다음 데이터 업데이트 (Tick by Tick 시뮬레이션)
 function updateChart() {
     if (currentIndex < allCandleData.length) {
         const nextCandle = allCandleData[currentIndex];
@@ -100,7 +98,6 @@ function updateChart() {
     }
 }
 
-// 6. Rewind 기능 (단순화)
 function rewindData() {
     currentIndex = Math.max(100, currentIndex - 100);
     candleSeries.setData(allCandleData.slice(0, currentIndex));
@@ -110,7 +107,6 @@ function rewindData() {
     statusEl.textContent = '상태: Rewind됨. 일시정지';
 }
 
-// 7. 매매 시뮬레이션 (Trading Logics)
 function placeTrade(type) {
     const currentCandle = allCandleData[currentIndex - 1];
     if (currentCandle) {
@@ -120,10 +116,8 @@ function placeTrade(type) {
     }
 }
 
-// 웹사이트 로드 시 데이터 불러오기
 fetchAndLoadData();
 
-// 창 크기 변경 시 차트 크기 조정
 window.addEventListener('resize', () => {
     chart.resize(chartArea.clientWidth, 500);
 });
