@@ -1,47 +1,59 @@
-body { font-family: sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
-.simulator-container { display: flex; flex: 1; }
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forex Practice Pro - 무료 트레이딩 연습</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- TradingView Lightweight Charts 라이브러리 임포트 -->
+    <script src="unpkg.com"></script>
+    <!-- Google AdSense 스크립트는 배포 후 직접 삽입 -->
+</head>
+<body>
 
-/* 왼쪽 광고 스타일 */
-.ad-left {
-  width: 200px; /* 광고 너비 */
-  background: #f0f0f0;
-  padding: 15px;
-  border-right: 1px solid #ccc;
-  text-align: center;
-  flex-shrink: 0;
-}
+<div class="simulator-container">
+  <div class="ad-left">
+    <!-- 왼쪽 CPC 광고 영역 (AdSense 코드 삽입 예정) -->
+    <h3>프리미엄 광고</h3>
+    <p>단가 높은 광고 위치</p>
+    <ins class="adsbygoogle" style="display:block" data-ad-client="YOUR_CLIENT_ID" data-ad-slot="YOUR_AD_SLOT"></ins>
+  </div>
+  <div class="main-content">
+    <div class="controls">
+      <!-- 속도 조절 및 재생 버튼 -->
+      <button onclick="togglePlayPause()">재생/일시정지</button>
+      <button onclick="changeSpeed(0.5)">0.5x</button>
+      <button onclick="changeSpeed(1)">1x</button>
+      <button onclick="changeSpeed(2)">2x</button>
+      <button onclick="changeSpeed(5)">5x</button>
+      <button onclick="rewindData()">Rewind</button>
+      <span id="status">상태: 로딩 중...</span>
+    </div>
+    <div id="chart-area">
+      <!-- 여기에 실제 Forex 차트가 들어갑니다 -->
+      <h2>Forex Candle Chart Area</h2>
+      <p>데이터 인덱스: <span id="index-display">0</span></p>
+    </div>
+    
+    <!-- 매매 시뮬레이션 및 메모 기능 추가 -->
+    <div class="trading-tools">
+        <button onclick="placeTrade('BUY')">BUY</button>
+        <button onclick="placeTrade('SELL')">SELL</button>
+        <textarea id="journal" placeholder="트레이딩 일지 작성..."></textarea>
+    </div>
 
-.main-content { flex: 1; padding: 15px; }
+  </div>
+</div>
+<div class="ad-bottom">
+  <!-- 하단 전면 광고 영역 (AdSense 코드 삽입 예정) -->
+  <h3>전면 광고 배너 (하단 고정)</h3>
+   <ins class="adsbygoogle" style="display:block" data-ad-client="YOUR_CLIENT_ID" data-ad-slot="YOUR_AD_SLOT"></ins>
+</div>
 
-/* 하단 전면 광고 스타일 */
-.ad-bottom {
-  background: #e9e9e9;
-  padding: 10px;
-  text-align: center;
-  border-top: 1px solid #ccc;
-}
+<script src="script.js"></script>
+<!-- 실제 AdSense 코드는 구글 승인 후 여기에 삽입합니다 -->
+<!-- <script async src="pagead2.googlesyndication.com" crossorigin="anonymous"></script> -->
+<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
 
-/* 차트 영역 스타일 */
-#chart-area {
-  height: 500px; /* 차트 높이 설정 */
-  background: #fff;
-  border: 1px solid #ccc;
-  margin-bottom: 15px;
-}
-
-/* 컨트롤 및 버튼 스타일 */
-.controls button, .trading-tools button {
-    padding: 8px 12px;
-    margin: 2px;
-    cursor: pointer;
-}
-#status { margin-left: 10px; font-weight: bold; color: blue; }
-#journal { width: 100%; height: 100px; margin-top: 10px; }
-
-
-/* 모바일 대응 (반응형) */
-@media (max-width: 768px) {
-    .simulator-container { flex-direction: column; }
-    .ad-left { width: auto; border-right: none; border-bottom: 1px solid #ccc; }
-    #chart-area { height: 300px; } /* 모바일에서 차트 높이 줄임 */
-}
+</body>
+</html>
