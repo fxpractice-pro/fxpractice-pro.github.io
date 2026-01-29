@@ -1,47 +1,31 @@
-body { font-family: sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
-.simulator-container { display: flex; flex: 1; }
-
-/* 왼쪽 광고 스타일 */
-.ad-left {
-  width: 200px; /* 광고 너비 */
-  background: #f0f0f0;
-  padding: 15px;
-  border-right: 1px solid #ccc;
-  text-align: center;
-  flex-shrink: 0;
+:root {
+    --bg-color: #0b120b;
+    --card-bg: #161e16;
+    --accent-green: #00ff6a;
+    --text-main: #e0e0e0;
 }
 
-.main-content { flex: 1; padding: 15px; }
-
-/* 하단 전면 광고 스타일 */
-.ad-bottom {
-  background: #e9e9e9;
-  padding: 10px;
-  text-align: center;
-  border-top: 1px solid #ccc;
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    margin: 0; display: flex; flex-direction: column; height: 100vh;
 }
 
-/* 차트 영역 스타일 */
-#chart-area {
-  height: 500px; /* 차트 높이 설정 */
-  background: #fff;
-  border: 1px solid #ccc;
-  margin-bottom: 15px;
+/* 상단바 & 레이아웃 */
+.header { height: 60px; display: flex; align-items: center; padding: 0 20px; justify-content: space-between; border-bottom: 1px solid #222; }
+
+.main-container { display: flex; flex: 1; overflow: hidden; }
+.chart-area { flex: 1; position: relative; background: radial-gradient(circle at center, #1a251a 0%, #0b120b 100%); }
+.side-panel { width: 300px; background: var(--card-bg); border-left: 1px solid #222; padding: 20px; }
+
+/* 속도 조절 플로팅 박스 (팀장님 요청 사항) */
+#speed-box {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: rgba(30, 40, 30, 0.9); border: 1px solid var(--accent-green);
+    border-radius: 12px; padding: 15px; display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5); cursor: move;
 }
 
-/* 컨트롤 및 버튼 스타일 */
-.controls button, .trading-tools button {
-    padding: 8px 12px;
-    margin: 2px;
-    cursor: pointer;
-}
-#status { margin-left: 10px; font-weight: bold; color: blue; }
-#journal { width: 100%; height: 100px; margin-top: 10px; }
-
-
-/* 모바일 대응 (반응형) */
-@media (max-width: 768px) {
-    .simulator-container { flex-direction: column; }
-    .ad-left { width: auto; border-right: none; border-bottom: 1px solid #ccc; }
-    #chart-area { height: 300px; } /* 모바일에서 차트 높이 줄임 */
-}
+button { background: #2a352a; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
+button:hover { background: var(--accent-green); color: black; }
