@@ -1,4 +1,4 @@
-// [script.js] 오토 스케일링 기능이 탑재된 캔들 엔진
+// [script.js] 우측 고정형 캔들 이동 엔진
 const canvas = document.getElementById('chartCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -8,90 +8,76 @@ const state = {
     currentTick: 0,
     speed: 1,
     isPlaying: true,
-    yMin: 0,
-    yMax: 0
 };
 
-// 1. 가격을 화면 Y좌표로 변환 (자동 범위 조절)
-function updateYRange(visibleData) {
-    const highs = visibleData.map(d => d[2]);
-    const lows = visibleData.map(d => d[3]);
-    state.yMax = Math.max(...highs) + 0.0005; // 여유 공간 추가
-    state.yMin = Math.min(...lows) - 0.0005;
-}
-
-function priceToY(price) {
-    return canvas.height - ((price - state.yMin) / (state.yMax - state.yMin)) * canvas.height;
-}
-
-// 2. 캔들 그리기 핵심
-function drawCandles() {
+// 1. 캔들 그리기 (우측에서 왼쪽으로 밀리는 로직)
+function draw() {
     if (state.rawData.length === 0) return;
-    
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // 현재 화면에 보일 데이터 추출 및 범위 업데이트
-    const visibleData = state.rawData.slice(0, state.currentIndex + 1);
-    updateYRange(visibleData);
+    const candleWidth = 20;
+    const spacing = 15;
+    const rightMargin = 80; // 우측 끝에서 이만큼 띄우고 시작
 
-    const candleWidth = 12;
-    const spacing = 6;
+    // 현재 화면에 보여줄 최대 캔들 개수 계산
+    const maxVisible = Math.floor((canvas.width - rightMargin) / (candleWidth + spacing));
+    const startIdx = Math.max(0, state.currentIndex - maxVisible);
+    const visibleData = state.rawData.slice(startIdx, state.currentIndex + 1);
+    
+    // 오토 스케일링 (Y축 범위 조절)
+    const highs = visibleData.map(d => d[2]);
+    const lows = visibleData.map(d => d[3]);
+    const yMax = Math.max(...highs) + 0.0005;
+    const yMin = Math.min(...lows) - 0.0005;
 
+    const getY = (p) => canvas.height - ((p - yMin) / (yMax - yMin)) * canvas.height;
+
+    // 역순으로 그리기 (가장 최근 것이 우측 끝에 오도록)
     visibleData.forEach((d, i) => {
         const [time, open, high, low, close] = d;
-        const isLast = i === state.currentIndex;
-        let currentClose = isLast ? open + (close - open) * (state.currentTick / 60) : close;
+        const isLast = (startIdx + i) === state.currentIndex;
+        let curClose = isLast ? open + (close - open) * (state.currentTick / 60) : close;
 
-        const x = i * (candleWidth + spacing) + 20; // 왼쪽 여백
-        const yOpen = priceToY(open);
-        const yClose = priceToY(currentClose);
-        const yHigh = priceToY(high);
-        const yLow = priceToY(low);
-
-        const color = currentClose >= open ? '#00ff6a' : '#ff4d4d';
+        // 위치 계산: 우측 끝에서부터 왼쪽으로 배치
+        const x = canvas.width - rightMargin - ((visibleData.length - 1 - i) * (candleWidth + spacing));
+        
+        const color = curClose >= open ? '#00ff6a' : '#ff4d4d';
         ctx.strokeStyle = color;
         ctx.fillStyle = color;
 
         // 심지
         ctx.beginPath();
-        ctx.moveTo(x + candleWidth/2, yHigh);
-        ctx.lineTo(x + candleWidth/2, yLow);
+        ctx.moveTo(x + candleWidth/2, getY(high));
+        ctx.lineTo(x + candleWidth/2, getY(low));
         ctx.stroke();
 
         // 몸통
-        ctx.fillRect(x, Math.min(yOpen, yClose), candleWidth, Math.max(1, Math.abs(yOpen - yClose)));
+        ctx.fillRect(x, Math.min(getY(open), getY(curClose)), candleWidth, Math.max(2, Math.abs(getY(open) - getY(curClose))));
+        
+        // 마지막 캔들에 현재가 라인 표시 (트레이딩 뷰 스타일)
+        if (isLast) {
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(0, getY(curClose));
+            ctx.lineTo(canvas.width, getY(curClose));
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
     });
 }
 
-// 3. 엔진 가동 및 루프
-async function initEngine() {
-    try {
-        const response = await fetch(`./data/EURUSD/2026-01.json`); 
-        state.rawData = await response.json();
-        console.log("데이터 확인:", state.rawData); // 여기서 데이터가 나오는지 F12로 확인 필수!
-        requestAnimationFrame(tickLoop);
-    } catch (e) {
-        console.error("파일 로드 실패. data 폴더 안의 파일명을 확인하세요.");
-    }
-}
-
-function tickLoop() {
-    if (state.isPlaying && state.rawData[state.currentIndex]) {
+// 2. 루프 및 데이터 가동 (기존 로직 유지)
+function loop() {
+    if (state.isPlaying && state.currentIndex < state.rawData.length) {
         state.currentTick += state.speed;
         if (state.currentTick >= 60) {
             state.currentTick = 0;
             state.currentIndex++;
         }
-        drawCandles();
-        
-        const data = state.rawData[state.currentIndex];
-        const timeStr = new Date(data[0] * 1000).toLocaleTimeString();
-        document.getElementById('current-time').innerText = `${timeStr} (${state.speed}x)`;
+        draw();
     }
-    requestAnimationFrame(tickLoop);
+    requestAnimationFrame(loop);
 }
 
-// 캔들 사이즈 초기화
-canvas.width = canvas.parentElement.clientWidth;
-canvas.height = canvas.parentElement.clientHeight;
-initEngine();
+// 초기화 함수 실행 (기존 init 함수 사용)
+init();
