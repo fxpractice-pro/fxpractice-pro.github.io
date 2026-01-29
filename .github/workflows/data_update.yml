@@ -1,0 +1,32 @@
+name: Daily Forex Data Collector
+
+on:
+  schedule:
+    - cron: '0 18 * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Dependencies
+        run: pip install pandas requests
+
+      - name: Run Collector Script
+        run: python scripts/collect_data.py
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name "DataBot"
+          git config --global user.email "bot@github.com"
+          git add data/
+          git commit -m "Update Forex Data [Skip CI]" || exit 0
+          git push
