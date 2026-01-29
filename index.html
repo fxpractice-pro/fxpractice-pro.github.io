@@ -2,59 +2,69 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forex Practice Pro - 무료 트레이딩 연습</title>
+    <title>ForexPractice Pro - Simulator</title>
     <link rel="stylesheet" href="style.css">
-    <!-- TradingView Lightweight Charts 라이브러리 임포트 (https: 포함된 올바른 주소) -->
-    <script src="cdn.jsdelivr.net"></script>
-    <!-- Google Adsense 주석 -->
 </head>
 <body>
+    <header class="top-nav">
+        <div class="logo">ForexPractice</div>
+        <div class="menu">Dashboard Analysis Community</div>
+        <div class="account-info">💰 $10,000.00</div>
+    </header>
 
-<div class="simulator-container">
-  <div class="ad-left">
-    <!-- 왼쪽 CPC 광고 영역 (AdSense 코드 삽입 예정) -->
-    <h3>프리미엄 광고</h3>
-    <p>단가 높은 광고 위치</p>
-    <ins class="adsbygoogle" style="display:block" data-ad-client="YOUR_CLIENT_ID" data-ad-slot="YOUR_AD_SLOT"></ins>
-  </div>
-  <div class="main-content">
-    <div class="controls">
-      <!-- 속도 조절 및 재생 버튼 -->
-      <button onclick="togglePlayPause()">재생/일시정지</button>
-      <button onclick="changeSpeed(0.5)">0.5x</button>
-      <button onclick="changeSpeed(1)">1x</button>
-      <button onclick="changeSpeed(2)">2x</button>
-      <button onclick="changeSpeed(5)">5x</button>
-      <button onclick="rewindData()">Rewind</button>
-      <span id="status">상태: 로딩 중...</span>
-    </div>
-    <div id="chart-area">
-      <!-- 여기에 실제 Forex 차트가 들어갑니다 -->
-      <h2>Forex Candle Chart Area</h2>
-      <p>데이터 인덱스: <span id="index-display">0</span></p>
-    </div>
-    
-    <!-- 매매 시뮬레이션 및 메모 기능 추가 -->
-    <div class="trading-tools">
-        <button onclick="placeTrade('BUY')">BUY</button>
-        <button onclick="placeTrade('SELL')">SELL</button>
-        <textarea id="journal" placeholder="트레이딩 일지 작성..."></textarea>
-    </div>
+    <main class="container">
+        <aside class="toolbar">
+            <div class="tool-icon">🔍</div>
+            <div class="tool-icon">📈</div>
+            <div class="tool-icon">📏</div>
+            <div class="tool-icon">TT</div>
+        </aside>
 
-  </div>
-</div>
-<div class="ad-bottom">
-  <!-- 하단 전면 광고 영역 (AdSense 코드 삽입 예정) -->
-  <h3>전면 광고 배너 (하단 고정)</h3>
-   <ins class="adsbygoogle" style="display:block" data-ad-client="YOUR_CLIENT_ID" data-ad-slot="YOUR_AD_SLOT"></ins>
-</div>
+        <section class="chart-section">
+            <div class="chart-header">
+                <div class="timeframes">
+                    <button class="tf-btn">1m</button>
+                    <button class="tf-btn">5m</button>
+                    <button class="tf-btn">15m</button>
+                    <button class="tf-btn active">1h</button>
+                    <button class="tf-btn">4h</button>
+                    <button class="tf-btn">D</button>
+                </div>
+                <div class="indicators">Indicators</div>
+            </div>
+            
+            <div id="main-chart-area">
+                <canvas id="chartCanvas"></canvas>
+                
+                <div id="speed-box">
+                    <div class="drag-handle">⠿</div>
+                    <button id="play-pause">▶️</button>
+                    <select id="speed-select">
+                        <option value="0.5">0.5x</option>
+                        <option value="1" selected>1x</option>
+                        <option value="2">2x</option>
+                        <option value="5">5x</option>
+                        <option value="10">10x</option>
+                        <option value="50">50x</option>
+                    </select>
+                    <span id="current-time">2023-10-12 08:00</span>
+                </div>
+            </div>
+        </section>
 
-<!-- !!! 중요: defer 속성과 함께 ./ 경로를 사용합니다. !!! -->
-<script src="./script.js" defer></script>
-<!-- 실제 AdSense 코드는 구글 승인 후 여기에 삽입합니다 -->
-<!-- <script async src="pagead2.googlesyndication.com" crossorigin="anonymous"></script> -->
-<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-
+        <aside class="trade-panel">
+            <h3>Market Simulator</h3>
+            <div class="balance-cards">
+                <div class="card">Balance<br><strong>$10,000.00</strong></div>
+                <div class="card">Equity<br><strong>$10,000.00</strong></div>
+            </div>
+            <div class="order-buttons">
+                <button class="btn-sell">SELL<br>1.08450</button>
+                <button class="btn-buy">BUY<br>1.08454</button>
+            </div>
+            <textarea placeholder="트레이딩 일지 작성..."></textarea>
+        </aside>
+    </main>
+    <script src="script.js"></script>
 </body>
 </html>
